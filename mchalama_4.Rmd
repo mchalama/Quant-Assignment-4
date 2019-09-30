@@ -1,0 +1,67 @@
+---
+title: "Assignment 4"
+author: "ManojKumar Chalamala"
+date: "9/30/2019"
+output: html_document
+---
+
+```{r}
+library(lpSolveAPI)
+
+### Heart Start Problem
+HeartStart <- make.lp(6, 8)
+
+# Set Objective Function
+set.objfn(HeartStart, c(622, 614, 630, 0, 641, 645, 649, 0))
+
+# Set values for the rows
+set.row(HeartStart, 1, c(1, 1, 1, 1), indices = c(1, 2, 3, 4))
+set.row(HeartStart, 2, c(1, 1, 1, 1), indices = c(5, 6, 7, 8))
+set.row(HeartStart, 3, c(1, 1), indices = c(1, 5))
+set.row(HeartStart, 4, c(1, 1), indices = c(2, 6))
+set.row(HeartStart, 5, c(1, 1), indices = c(3, 7))
+set.row(HeartStart, 6, c(1, 1), indices = c(4, 8))
+
+
+# Set Right Hand side
+rhs <- c(100, 120, 80, 60, 70, 10)
+set.rhs(HeartStart, rhs)
+
+#set Constraint type
+set.constr.type(HeartStart, rep("=", 6), constraints = 1:6)
+
+set.bounds(HeartStart, lower = rep(0, 8))
+
+
+# finally, name the decision variables (column) and constraints (rows)
+lp.colnames <- c("AW1", "AW2", "AW3", "AW4", "BW1", "BW2", "BW3", "BW4")
+lp.rownames <- c("PlantA Capacity", "PlantB Capacity", "WH1 Demand", "WH2 Demand", "WH3 Demand", "WH4 Demand")
+dimnames(HeartStart) <- list(lp.rownames, lp.colnames)
+
+lp.control(HeartStart, sense="min")
+
+# view the linear program object to make sure it's correct
+HeartStart
+
+# now solve the model
+solve(HeartStart)
+# --> A return value of 0 indicates that the model was successfully solved.
+
+#objective function value
+get.objective(HeartStart)
+
+#Optimal decision Variable values
+get.variables(HeartStart)
+
+#Constraints
+get.constraints(HeartStart)
+
+# look at surplus for each constraint
+get.constraints(HeartStart) - rhs
+
+#Identify sensitivity
+get.sensitivity.rhs(HeartStart)
+
+get.dual.solution(HeartStart)
+```
+
